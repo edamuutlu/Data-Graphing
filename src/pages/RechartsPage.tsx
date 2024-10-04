@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Header from "../components/Header";
 import { motion } from "framer-motion";
 import CategoryDistributionChart from "../components/ReCharts/CategoryDistributionChart";
@@ -12,22 +12,13 @@ const RechartsPage = () => {
   const { data, columns } = erpData;
   const [selectedColumns, setSelectedColumns] = useState([]);
 
-  const numericColumns = useMemo(() => {
-    return columns.filter(column => typeof data[0][column.dataIndex] === 'number');
-  }, [columns, data]);
-
-  const stringColumns = useMemo(() => {
-    return columns.filter(column => typeof data[0][column.dataIndex] === 'string');
-  }, [columns, data]);
-
   const handleColumnSelect = (columnKey) => {
     setSelectedColumns(prev => {
       if (prev.includes(columnKey)) {
         return prev.filter(key => key !== columnKey);
-      } else if (prev.length < 2) {
+      } else {
         return [...prev, columnKey];
       }
-      return prev;
     });
   };
 
@@ -39,10 +30,6 @@ const RechartsPage = () => {
           <Checkbox
             checked={selectedColumns.includes(column.dataIndex)}
             onChange={() => handleColumnSelect(column.dataIndex)}
-            disabled={
-              selectedColumns.length === 2 &&
-              !selectedColumns.includes(column.dataIndex)
-            }
           >
             {column.title}
           </Checkbox>
