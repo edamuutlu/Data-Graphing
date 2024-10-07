@@ -10,13 +10,13 @@ import {
 } from "recharts";
 
 const dailySalesData = [
-  { name: "Mon", sales: 1000 },
-  { name: "Tue", sales: 1200 },
-  { name: "Wed", sales: 900 },
-  { name: "Thu", sales: 1100 },
-  { name: "Fri", sales: 1300 },
-  { name: "Sat", sales: 1600 },
-  { name: "Sun", sales: 1400 },
+  { name: "Mon", satis: 1000 },
+  { name: "Tue", satis: 1200 },
+  { name: "Wed", satis: 900 },
+  { name: "Thu", satis: 1100 },
+  { name: "Fri", satis: 1300 },
+  { name: "Sat", satis: 1600 },
+  { name: "Sun", satis: 1400 },
 ];
 
 const DailySalesTrend = () => {
@@ -28,7 +28,7 @@ const DailySalesTrend = () => {
       transition={{ delay: 0.4 }}
     >
       <h2 className="text-xl font-semibold text-gray-100 mb-4">
-        Daily Sales Trend
+        Günlük Satış Miktarları
       </h2>
 
       <div style={{ width: "100%", height: 300 }}>
@@ -44,7 +44,7 @@ const DailySalesTrend = () => {
               }}
               itemStyle={{ color: "#E5E7EB" }}
             />
-            <Bar dataKey="sales" fill="#10B981" />
+            <Bar dataKey="satis" fill="#10B981" />
           </BarChart>
         </ResponsiveContainer>
       </div>

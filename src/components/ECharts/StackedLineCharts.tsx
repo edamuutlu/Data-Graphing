@@ -1,70 +1,79 @@
 import { motion } from "framer-motion";
-import ReactECharts from 'echarts-for-react';
+import ReactECharts from "echarts-for-react";
 import { erpData } from "../../utils/erpData";
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300']; 
+const aylar = [
+  "Oca", "Şub", "Mar", "Nis", "May", "Haz",
+  "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"
+];
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300"];
+
+interface Param {
+  axisValue: string;
+  seriesName: string;
+  value: number; // Satış miktarı
+}
 
 export const StackedLineCharts = () => {
   const { data } = erpData;
-  
-  const series = data.map((product, index) => ({
-    name: product.product,
-    type: 'line',
-    stack: 'Total',
+
+  const series = data.map((urun, index) => ({
+    name: urun.product,
+    type: "line",
+    stack: "Total",
     areaStyle: {},
     emphasis: {
-      focus: 'series'
+      focus: "series",
     },
-    data: product.monthlySales,
+    data: urun.monthlySales,
     itemStyle: {
-      color: colors[index % colors.length]
-    }
+      color: colors[index % colors.length],
+    },
   }));
 
   const option = {
     tooltip: {
-      trigger: 'axis',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      borderColor: '#333',
+      trigger: "axis",
+      backgroundColor: "rgba(0, 0, 0, 0.7)",
+      borderColor: "#333",
       textStyle: {
-        color: '#fff'
+        color: "#fff",
       },
-      formatter: function (params) {
+      formatter: function (params: Param[]) {
         let result = `${params[0].axisValue}<br/>`;
         params.forEach((param) => {
           result += `${param.seriesName}: ${param.value} sales<br/>`;
         });
         return result;
-      }
+      },
     },
     legend: {
-      data: data.map(product => product.product),
+      data: data.map((urun) => urun.product),
       textStyle: {
-        color: '#9CA3AF'
-      }
+        color: "#9CA3AF",
+      },
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      containLabel: true,
     },
     xAxis: {
-      type: 'category',
+      type: "category",
       boundaryGap: false,
-      data: months,
+      data: aylar,
       axisLabel: {
-        color: '#9CA3AF'
-      }
+        color: "#9CA3AF",
+      },
     },
     yAxis: {
-      type: 'value',
+      type: "value",
       axisLabel: {
-        color: '#9CA3AF'
-      }
+        color: "#9CA3AF",
+      },
     },
-    series: series
+    series: series,
   };
 
   return (
@@ -75,11 +84,11 @@ export const StackedLineCharts = () => {
       transition={{ delay: 0.2 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Monthly Sales Overview
+        Aylık Satış Özeti
       </h2>
       <ReactECharts
         option={option}
-        style={{ height: '400px', width: '100%' }}
+        style={{ height: "400px", width: "100%" }}
         theme="light"
       />
     </motion.div>

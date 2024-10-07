@@ -4,9 +4,40 @@ import SalesTrendChart from "../components/AntDesign/SalesTrendChart";
 import { ConfigProvider, Table } from "antd";
 import { erpData } from "../utils/erpData";
 import CategoryChart from "../components/AntDesign/CategoryChart";
+import { useMemo } from "react";
+
+type DataTuru = {
+  monthlyStock: number[];
+  monthlySales: number[];
+};
+
+type ColumnType = {
+  title: string;
+  dataIndex: string;
+  key: string;
+  render?: (text: string, record: DataTuru) => React.ReactNode; // render fonksiyonu opsiyonel
+};
 
 const AntDesignPage = () => {
   const { data, columns } = erpData;
+
+  const updatedColumns = useMemo(() => {
+    return columns.map((column: ColumnType) => ({
+      ...column,
+      render: (text: string, record: DataTuru) => {
+        if (column.dataIndex === 'stock') {
+          const totalStock = record.monthlyStock.reduce((total: number, stock: number) => total + stock, 0);
+          return totalStock;
+        } 
+        else if (column.dataIndex === 'sales') {
+          const totalSales = record.monthlySales.reduce((total: number, sales: number) => total + sales, 0);
+          return totalSales;
+        }
+        return text;
+      },
+    }));
+  }, [columns]);
+
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Ant Design" />
@@ -25,12 +56,12 @@ const AntDesignPage = () => {
                 token: {
                   colorBgContainer: "#1f2937",
                   colorText: "#fff",
-                  colorTextLabel: "#9ca3af"
+                  colorTextLabel: "#9ca3af",
                 },
               }}
             >
               <Table
-                columns={columns}
+                columns={updatedColumns}
                 dataSource={data}
                 pagination={false}
                 rowClassName={() =>

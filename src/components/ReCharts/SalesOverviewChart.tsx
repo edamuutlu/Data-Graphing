@@ -1,48 +1,65 @@
-import React, { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+import { useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 
-const SalesOverviewChart = ({ selectedColumns, data }) => {
-  const chartData = useMemo(() => {
+const months = [
+  "Oca", "Şub", "Mar", "Nis", "May", "Haz",
+  "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"
+];
+
+interface DataItem {
+  [id: string]: string | number | number[];
+  monthlySales: number[];
+  monthlyStock: number[];
+}
+
+interface ChartDataItem {
+  name: string;
+  totalSales: number;
+  totalStock: number;
+  [id: string]: string | number;
+}
+
+interface SalesOverviewChartProps {
+  selectedColumns: string[];
+  data: DataItem[];
+}
+
+const SalesOverviewChart = (props: SalesOverviewChartProps) => { 
+  const { selectedColumns, data } = props; 
+  const chartData: ChartDataItem[] = useMemo(() => {
     if (selectedColumns.length < 2) {
       return [];
     }
 
-    const stringColumn = selectedColumns.find(col => typeof data[0][col] === 'string');
-    const numericColumns = selectedColumns.filter(col => typeof data[0][col] === 'number');
-
-    const groupedData = data.reduce((acc, item) => {
-      const key = item[stringColumn];
-      if (!acc[key]) {
-        acc[key] = Array(12).fill().map(() => ({ sales: 0, stock: 0 }));
+    const stringColumn = selectedColumns.find(col => typeof data[0][col] === 'string') || '';
+    
+    const groupedData = data.reduce<Record<string, { sales: number; stock: number }[]>>((acc, item) => {
+      const id = item[stringColumn] as string;
+      if (!acc[id]) {
+        acc[id] = Array(12).fill(null).map(() => ({ sales: 0, stock: 0 }));
       }
       
-      item.monthlySales.forEach((sale, index) => {
-        acc[key][index].sales += sale;
+      (item.monthlySales as number[]).forEach((sale, index) => {
+        acc[id][index].sales += sale;
       });
       
-      item.monthlyStock.forEach((stock, index) => {
-        acc[key][index].stock += stock;
+      (item.monthlyStock as number[]).forEach((stock, index) => {
+        acc[id][index].stock += stock;
       });
       
       return acc;
     }, {});
 
     return months.map((month, index) => {
-      const monthData = { name: month };
-      let totalSales = 0;
-      let totalStock = 0;
+      const monthData: ChartDataItem = { name: month, totalSales: 0, totalStock: 0 };
 
-      Object.keys(groupedData).forEach(key => {
-        monthData[`${key}_sales`] = groupedData[key][index].sales;
-        monthData[`${key}_stock`] = groupedData[key][index].stock;
-        totalSales += groupedData[key][index].sales;
-        totalStock += groupedData[key][index].stock;
+      Object.keys(groupedData).forEach(id => {
+        monthData[`${id}_sales`] = groupedData[id][index].sales;
+        monthData[`${id}_stock`] = groupedData[id][index].stock;
+        monthData.totalSales += groupedData[id][index].sales;
+        monthData.totalStock += groupedData[id][index].stock;
       });
-
-      monthData.totalSales = totalSales;
-      monthData.totalStock = totalStock;
 
       return monthData;
     });
@@ -52,30 +69,34 @@ const SalesOverviewChart = ({ selectedColumns, data }) => {
     return <div>Lütfen en az bir string ve bir sayısal sütun seçin.</div>;
   }
 
-  const stringColumn = selectedColumns.find(col => typeof data[0][col] === 'string');
-  const numericColumns = selectedColumns.filter(col => typeof data[0][col] === 'number');
+  const numericColumns = selectedColumns.filter(col => typeof data[0][col] === 'number')
+  .map(col => col.charAt(0).toUpperCase() + col.slice(1));
 
   const lineColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip bg-gray-800 p-4 rounded shadow">
-          <p className="label text-white">{`${label}`}</p>
+          <p className="label text-white font-bold mb-2">{`${label}`}</p>
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }}>
+            <p key={index} style={{ color: entry.color }} className="font-semibold">
               {`${entry.name}: ${entry.value}`}
             </p>
           ))}
           <div className="mt-2 border-t border-gray-600 pt-2">
-            <p className="text-white font-bold">Details:</p>
+            <p className="text-white font-bold mb-1">Detaylar:</p>
             {Object.keys(payload[0].payload)
               .filter(key => key.includes('_sales') || key.includes('_stock'))
-              .map((key, index) => (
-                <p key={index} className="text-gray-300">
-                  {`${key.split('_')[0]}: ${payload[0].payload[key]}`}
-                </p>
-              ))}
+              .map((key, index) => {
+                const [product, type] = key.split('_');
+                const value = payload[0].payload[key];
+                return (
+                  <p key={index} className="text-gray-300">
+                    {`${product} ${type === 'sales' ? 'Satış' : 'Stok'}: ${value}`}
+                  </p>
+                );
+              })}
           </div>
         </div>
       );
@@ -93,24 +114,15 @@ const SalesOverviewChart = ({ selectedColumns, data }) => {
           <YAxis />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
-          {numericColumns.includes('sales') && (
+          {numericColumns.map((col,i)=>(
             <Line 
-              type="monotone" 
-              dataKey="totalSales" 
-              stroke={lineColors[0]} 
-              name="Toplam Satış"
-              strokeWidth={2}
-            />
-          )}
-          {numericColumns.includes('stock') && (
-            <Line 
-              type="monotone" 
-              dataKey="totalStock" 
-              stroke={lineColors[1]} 
-              name="Toplam Stok"
-              strokeWidth={2}
-            />
-          )}
+            type="monotone" 
+            dataKey={`total${col}`} 
+            stroke={lineColors[i]}  
+            name={`Total ${col}`}
+            strokeWidth={2}
+          />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>

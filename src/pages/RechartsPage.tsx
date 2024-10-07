@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import Header from "../components/Header";
 import { motion } from "framer-motion";
 import CategoryDistributionChart from "../components/ReCharts/CategoryDistributionChart";
@@ -8,35 +8,65 @@ import { erpData } from "../utils/erpData";
 import StackedLineChart from "../components/ReCharts/StackedLineChart";
 import SalesOverviewChart from "../components/ReCharts/SalesOverviewChart";
 
-const RechartsPage = () => {
-  const { data, columns } = erpData;
-  const [selectedColumns, setSelectedColumns] = useState([]);
+type DataTuru = {
+  monthlyStock: number[];
+  monthlySales: number[];
+};
 
-  const handleColumnSelect = (columnKey) => {
-    setSelectedColumns(prev => {
+type SutunTuru = {
+  title: string;
+  dataIndex: string;
+  key: string;
+  render?: (text: string, record: DataTuru) => React.ReactNode; 
+};
+
+const RechartsPage = () => {
+  const [secilenSutunlar, setSecilenSutunlar] = useState<string[]>([]);
+  const { data, columns } = erpData;
+
+  const sutunSeciminiIsle = (columnKey: string) => {
+    setSecilenSutunlar((prev) => {
       if (prev.includes(columnKey)) {
-        return prev.filter(key => key !== columnKey);
+        return prev.filter((key) => key !== columnKey);
       } else {
         return [...prev, columnKey];
       }
     });
   };
 
-  const updatedColumns = useMemo(() => {
-    return columns.map(column => ({
+  const guncelVeri = useMemo(() => {
+    return data.map((record) => ({
+      ...record,
+      sales: record.monthlySales.reduce((total, sales) => total + sales, 0),
+      stock: record.monthlyStock.reduce((total, stock) => total + stock, 0),
+    }));
+  }, [data]);
+  
+  const guncelSutunlar = useMemo(() => {
+    return columns.map((column: SutunTuru) => ({
       ...column,
+      render: (text: string, record: DataTuru) => {
+        if (column.dataIndex === 'stock') {
+          const toplamStok = record.monthlyStock.reduce((total: number, stock: number) => total + stock, 0);
+          return toplamStok;
+        } 
+        else if (column.dataIndex === 'sales') {
+          const toplamSatis = record.monthlySales.reduce((total: number, sales: number) => total + sales, 0);
+          return toplamSatis;
+        }
+        return text;
+      },
       title: (
-        <div>
-          <Checkbox
-            checked={selectedColumns.includes(column.dataIndex)}
-            onChange={() => handleColumnSelect(column.dataIndex)}
-          >
-            {column.title}
-          </Checkbox>
-        </div>
+        <Checkbox
+          checked={secilenSutunlar.includes(column.dataIndex)}
+          onChange={() => sutunSeciminiIsle(column.dataIndex)}
+        >
+          {column.title}
+        </Checkbox>
       ),
     }));
-  }, [columns, selectedColumns]);
+  }, [columns, secilenSutunlar]);
+  
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
@@ -56,12 +86,12 @@ const RechartsPage = () => {
                 token: {
                   colorBgContainer: "#1f2937",
                   colorText: "#fff",
-                  colorTextLabel: "#9ca3af"
+                  colorTextLabel: "#9ca3af",
                 },
               }}
             >
               <Table
-                columns={updatedColumns}
+                columns={guncelSutunlar}
                 dataSource={data}
                 pagination={false}
                 rowClassName={() =>
@@ -74,7 +104,7 @@ const RechartsPage = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <SalesOverviewChart selectedColumns={selectedColumns} data={data} />
+          <SalesOverviewChart selectedColumns={secilenSutunlar} data={guncelVeri} />
           <StackedLineChart />
           <CategoryDistributionChart />
           <SalesChannelChart />

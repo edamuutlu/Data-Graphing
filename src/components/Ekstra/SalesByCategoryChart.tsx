@@ -26,7 +26,7 @@ const SalesByCategoryChart = () => {
       transition={{ delay: 0.3 }}
     >
       <h2 className="text-xl font-semibold text-gray-100 mb-4">
-        Sales by Category
+        Kategoriye Göre Satışlar
       </h2>
 
       <div style={{ width: "100%", height: 300 }}>

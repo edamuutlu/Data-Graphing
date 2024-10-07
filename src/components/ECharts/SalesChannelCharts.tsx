@@ -1,15 +1,22 @@
+"use client"
+
 import ReactECharts from 'echarts-for-react';
 import { motion } from "framer-motion";
 import { erpData } from "../../utils/erpData";
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
-const SalesChannelCharts = () => {
-  const { data } = erpData;
+interface SalesData {
+  salesChannel: string;
+  monthlySales: number[];
+}
+
+const SalesChannelCharts: React.FC = () => {
+  const { data } = erpData as { data: SalesData[] };
 
   const channelData = data.map(item => ({
     name: item.salesChannel,
-    value: item.sales
+    value: item.monthlySales.reduce((sum, satis) => sum + satis, 0)
   }));
 
   const getOption = () => ({
@@ -19,6 +26,9 @@ const SalesChannelCharts = () => {
       borderColor: "#4B5563",
       textStyle: {
         color: "#E5E7EB"
+      },
+      formatter: (params: { name: string; value: number }) => {
+        return `${params.name}: ${params.value.toLocaleString()} toplam satış`;
       }
     },
     grid: {
@@ -32,6 +42,8 @@ const SalesChannelCharts = () => {
       data: channelData.map(item => item.name),
       axisLabel: {
         color: '#9CA3AF',
+        rotate: 45,
+        interval: 0
       },
       axisLine: {
         lineStyle: {
@@ -43,6 +55,7 @@ const SalesChannelCharts = () => {
       type: 'value',
       axisLabel: {
         color: '#9CA3AF',
+        formatter: (value: number) => value.toLocaleString()
       },
       axisLine: {
         lineStyle: {
@@ -51,11 +64,11 @@ const SalesChannelCharts = () => {
       },
     },
     series: [{
-      name: 'Sales',
+      name: 'Toplam Satış',
       type: 'bar',
       data: channelData.map(item => item.value),
       itemStyle: {
-        color: (params) => COLORS[params.dataIndex % COLORS.length],
+        color: (params: { dataIndex: number }) => COLORS[params.dataIndex % COLORS.length],
       },
     }],
   });
@@ -68,7 +81,7 @@ const SalesChannelCharts = () => {
       transition={{ delay: 0.4 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Sales by Channel
+        Satış Kanalına Göre Toplam Satışlar
       </h2>
 
       <div className="h-80">

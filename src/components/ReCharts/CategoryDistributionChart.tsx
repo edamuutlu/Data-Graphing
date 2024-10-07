@@ -13,9 +13,9 @@ const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 const CategoryDistributionChart = () => {
   const { data } = erpData;
 
-  const categoryData = data.map(item => ({
+  const categoryData = data.map((item) => ({
     name: item.category,
-    value: item.stock
+    value: item.monthlyStock.reduce((total, stock) => total + stock, 0),
   }));
 
   return (
@@ -26,7 +26,7 @@ const CategoryDistributionChart = () => {
       transition={{ delay: 0.3 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Category Distribution
+        Kategori Dağılımı
       </h2>
       <div className="h-80">
         <ResponsiveContainer width={"100%"} height={"100%"}>

@@ -6,9 +6,40 @@ import SalesOverviewCharts from "../components/ECharts/SalesOverviewCharts";
 import StackedLineCharts from "../components/ECharts/StackedLineCharts";
 import CategoryDistributionCharts from "../components/ECharts/CategoryDistributionCharts";
 import SalesChannelCharts from "../components/ECharts/SalesChannelCharts";
+import { useMemo } from "react";
+
+type DataTuru = {
+  monthlyStock: number[];
+  monthlySales: number[];
+};
+
+type ColumnType = {
+  title: string;
+  dataIndex: string;
+  key: string;
+  render?: (text: string, record: DataTuru) => React.ReactNode; // render fonksiyonu opsiyonel
+};
 
 const EChartsPage = () => {
   const { data, columns } = erpData;
+
+  const updatedColumns = useMemo(() => {
+    return columns.map((column: ColumnType) => ({
+      ...column,
+      render: (text: string, record: DataTuru) => {
+        if (column.dataIndex === 'stock') {
+          const totalStock = record.monthlyStock.reduce((total: number, stock: number) => total + stock, 0);
+          return totalStock;
+        } 
+        else if (column.dataIndex === 'sales') {
+          const totalSales = record.monthlySales.reduce((total: number, sales: number) => total + sales, 0);
+          return totalSales;
+        }
+        return text;
+      },
+    }));
+  }, [columns]);
+
 
   return (
     <div className="flex-1 overflow-auto relative z-10">
@@ -33,7 +64,7 @@ const EChartsPage = () => {
               }}
             >
               <Table
-                columns={columns}
+                columns={updatedColumns}
                 dataSource={data}
                 pagination={false}
                 rowClassName={() =>

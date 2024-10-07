@@ -11,7 +11,7 @@ const CategoryDistributionCharts = () => {
   // ECharts için gerekli veriyi hazırlama
   const categoryData = data.map(item => ({
     name: item.category,
-    value: item.stock,
+    value: item.monthlyStock.reduce((total, stock) => total + stock, 0)
   }));
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const CategoryDistributionCharts = () => {
       transition={{ delay: 0.3 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Monthly Total Sales Overview
+        Aylık Toplam Satış Özeti
       </h2>
       <div ref={chartRef} style={{ height: "400px", width: "100%" }} />
     </motion.div>

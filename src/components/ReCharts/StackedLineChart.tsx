@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from "framer-motion";
 import {
   LineChart,
@@ -9,13 +8,42 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
 import { erpData } from "../../utils/erpData";
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300']; // Add more colors if needed
+const aylar = [
+  "Oca", "Şub", "Mar", "Nis", "May", "Haz",
+  "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"
+];
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300"];
 
-const CustomTooltip = ({ active, payload, label }) => {
+interface Product {
+  product: string;
+  monthlySales: number[];
+}
+
+interface SalesData {
+  name: string;
+  [key: string]: string | number;
+}
+
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+  label?: string;
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const {
+  active,
+  payload,
+  label,
+} = props; 
   if (active && payload && payload.length) {
     return (
       <div className="bg-gray-800 p-4 border border-gray-700 rounded">
@@ -31,12 +59,12 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export const StackedLineChart = () => {
-  const { data } = erpData;
-  
-  const salesData = months.map((month, index) => {
-    const monthData = { name: month };
-    data.forEach(product => {
+export const StackedLineChart: React.FC = () => {
+  const { data } = erpData as { data: Product[] };
+
+  const salesData: SalesData[] = aylar.map((month, index) => {
+    const monthData: SalesData = { name: month };
+    data.forEach((product) => {
       monthData[product.product] = product.monthlySales[index];
     });
     return monthData;
@@ -50,11 +78,11 @@ export const StackedLineChart = () => {
       transition={{ delay: 0.2 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Monthly Sales Overview
+        Aylık Satış Özeti
       </h2>
 
       <div>
-        <ResponsiveContainer width={"100%"} height={400}>
+        <ResponsiveContainer width="100%" height={400}>
           <LineChart data={salesData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#4B5563" />
             <XAxis dataKey="name" stroke="#9ca3af" />

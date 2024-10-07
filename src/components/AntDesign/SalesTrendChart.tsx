@@ -4,39 +4,39 @@ import { erpData } from "../../utils/erpData";
 const SalesTrendChart = () => {
   const { data } = erpData;
 
-  const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  const aylar = [
+    "Oca", "Şub", "Mar", "Nis", "May", "Haz",
+    "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"
   ];
 
-  const chartData = monthNames.flatMap((month, index) => {
+  const chartData = aylar.flatMap((ay, index) => {
     return data.map(product => ({
-      month,
+      ay,
       product: product.product,
-      sales: product.monthlySales[index] || 0, // Use 0 instead of null
+      satis: product.monthlySales[index] || 0, 
     }));
   });
   
   const config = {
     data: chartData,
-    xField: "month",
-    yField: "sales",
+    xField: "ay",
+    yField: "satis",
     seriesField: "product",
     xAxis: {
       title: {
-        text: "Month",
+        text: "Ay",
         style: { fill: "#E5E7EB" },
       },
       label: { style: { fill: "#9CA3AF" } },
     },
     yAxis: {
       title: {
-        text: "Sales",
+        text: "Satışlar",
         style: { fill: "#E5E7EB" },
       },
       label: { style: { fill: "#9CA3AF" } },
       min: 0,
-      max: 360, // Adjust based on your data
+      max: 360, 
       tickInterval: 90,
     },
     legend: {
@@ -57,10 +57,10 @@ const SalesTrendChart = () => {
           color: "#E5E7EB",
         },
       },
-      formatter: (datum) => {
+      formatter: (datum: { product: string; satis: number }) => {
         return {
           name: datum.product,
-          value: datum.sales,
+          value: datum.satis,
         };
       },
     },
@@ -70,7 +70,7 @@ const SalesTrendChart = () => {
   
   return (
     <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700">
-      <h2 className="text-xl font-semibold text-gray-100 mb-4">Monthly Sales Overview</h2>
+      <h2 className="text-xl font-semibold text-gray-100 mb-4">Aylık Satış Özeti</h2>
       <div style={{ width: "100%", height: 400 }}>
         <Line {...config} />
       </div>

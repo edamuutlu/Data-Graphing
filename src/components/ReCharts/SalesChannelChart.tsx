@@ -17,9 +17,9 @@ const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 const SalesChannelChart = () => {
   const { data } = erpData;
 
-  const channelData = data.map(item => ({
+  const channelData = data.map((item) => ({
     name: item.salesChannel,
-    value: item.sales
+    value: item.monthlySales.reduce((sum, satis) => sum + satis, 0),
   }));
 
   return (
@@ -30,7 +30,7 @@ const SalesChannelChart = () => {
       transition={{ delay: 0.4 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Sales by Channel
+        Kanala Göre Satışlar
       </h2>
 
       <div className="h-80">
@@ -48,7 +48,7 @@ const SalesChannelChart = () => {
             />
             <Legend />
             <Bar dataKey={"value"} fill="#8884d8">
-              {channelData.map((entry, index) => (
+              {channelData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}

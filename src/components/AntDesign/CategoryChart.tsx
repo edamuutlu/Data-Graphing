@@ -9,8 +9,9 @@ export default function CategoryChart() {
 
   const categoryData = data.map(item => ({
     type: item.category,
-    value: item.stock
-  }))
+    value: item.monthlyStock.reduce((total, stock) => total + stock, 0) 
+  }));
+  
 
   const config = {
     appendPadding: 10,
@@ -52,7 +53,7 @@ export default function CategoryChart() {
       transition={{ delay: 0.3 }}
     >
       <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Category Distribution
+        Kategori Dağılımı
       </h2>
       <div style={{ width: "100%", height: 400 }}>
         <Pie {...config} />
